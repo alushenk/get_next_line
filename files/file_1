@@ -1,3 +1,5 @@
-We consider that get_next_line has an undefined behavior if, between two calls,
-the same file descriptor designs two distinct files although the reading from the first
+We consider that get_next_line has an undefined behavior if,
+ between two calls,
+the same file descriptor designs two distinct files
+although the reading from the first
 file was not completed.
