@@ -7,9 +7,11 @@
 
 int main(int argc, char **argv)
 {
-	int fd;
-	char *line;
+	int		fd;
+	char	*line;
+	int 	i;
 
+	i = 0;
 	if (argc == 2)
 	{
 		fd = open(argv[1], O_RDONLY);
@@ -17,6 +19,7 @@ int main(int argc, char **argv)
         {
             printf("%s\n", line);
             free(line);
+			i++;
         }
 	}
 	return (0);

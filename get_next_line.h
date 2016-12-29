@@ -12,6 +12,6 @@
 
 int get_next_line(const int fd, char **line);
 
-#define BUFF_SIZE 5
+#define BUFF_SIZE 333
 
 #endif //GET_NEXT_LINE_GET_NEXT_LINE_H
