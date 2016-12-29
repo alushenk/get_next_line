@@ -20,31 +20,37 @@ int get_next_line(const int fd, char **line)
 	/*
 	 * тут пролистывать по статической структуре, ища нужный файл дескриптор.
 	 *
-	 * сделать проверку если в буфере осталось что-то с прошлого раза
-	 *
 	 * в структуре можно на вяский случай сохранять индекс на котором начинаются оставшиеся символы
 	 * и колличечтво считанных байт(длинну буфера)
 	 *
 	 * после считывания остатка из буфера его даже не нужно фришить, это делает read
 	 */
 
-	temp = buf;
-	while(*temp != '\n' && *temp)
-		temp++;
-	if (*temp == '\n')
+	//если в буфере осталось что-то с прошлого раза
+	if (*buf)
 	{
-		temp++;
-		result = ft_strdup(temp);
-		while(*temp)
-		{
-			temp++;
-			temp_size++;
-		}
+		len = 0;
+		//узнаем длинну слова
+		while (buf[len] != '\n' && buf[len])
+			len++;
+		//выделяем память под строку, которую будем возвращать
+		result = ft_strnew(len);
+		//записываем в нее байты из буфера
+		result = ft_strncpy(result, buf, len);
+		//копируем оставшиеся символы во временную строку
+		temp = ft_strdup(buf + len + 1);
+		//зануляем старый буфер
+		ft_bzero(buf, BUFF_SIZE + 1);
+		//записываем в начало буфера временную строку(остаток)
+		ft_strcpy(buf, temp);
+		//освобождаем temp
+		free(temp);
+		//расширяем размер результата на случай если мы еще будем что-то считывать
+		temp_size += len;
 	}
 
 	while ((bytes_read = read(fd, buf, BUFF_SIZE)))
 	{
-		//\0 не может быть считан из файла, логика будет работать нормально
 		buf[bytes_read] = '\0';
 		len = 0;
 		while (buf[len] != '\n' && len < bytes_read)
@@ -77,11 +83,20 @@ int get_next_line(const int fd, char **line)
 			//temporary string doesn't needed
 			free(temp);
 		}
-		if (len != bytes_read)
+		if (len < bytes_read)
 		{
+			temp = ft_strdup(buf + len + 1);
+			ft_bzero(buf, BUFF_SIZE + 1);
+			ft_strcpy(buf, temp);
 			*line = result;
-			return(0);
+			return(1);
 		}
 	}
-	return (1);
+	//если bytes_read < BUFF_SIZE
+	if (result)
+	{
+		*line = result;
+		return (1);
+	}
+	return (0);
 }

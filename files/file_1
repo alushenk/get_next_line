@@ -1,5 +1,6 @@
 We c
-onsider that get_next_line has an undefined behavior if,
+onsider that
+get_next_line has an undefined behavior if,
  between two calls,
 the same file descriptor designs two distinct files
 although the reading from the first
