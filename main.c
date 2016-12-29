@@ -18,3 +18,12 @@ int main(int argc, char **argv)
 	}
 	return (0);
 }
+//просто написать псевдокод, с либой компилить уже в юните
+/*
+char  *line
+while (get_next_line(fd, &line))
+{
+    printf("%s\n", line);
+    free(line);
+}
+ */
