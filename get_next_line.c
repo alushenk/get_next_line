@@ -17,35 +17,42 @@ int get_next_line(const int fd, char **line)
 	bytes_read = 0;
 	temp_size = 0;
 	result = NULL;
+
+	//подточить напильником логику так, чтобы возвращало -1
+	//если одна из библиотечных функций не смогла выделить память.
+	if (fd < 0)
+		return (-1);
 	/*
-	 * тут пролистывать по статической структуре, ища нужный файл дескриптор.
-	 *
-	 * в структуре можно на вяский случай сохранять индекс на котором начинаются оставшиеся символы
-	 * и колличечтво считанных байт(длинну буфера)
-	 *
-	 * после считывания остатка из буфера его даже не нужно фришить, это делает read
+	 ** тут пролистывать по статической структуре, ища нужный файл дескриптор.
+	 **
+	 ** в структуре можно на вяский случай сохранять индекс на котором начинаются оставшиеся символы
+	 ** и колличечтво считанных байт(длинну буфера)
+	 **
+	 ** после считывания остатка из буфера его даже не нужно фришить, это делает read
 	 */
 
 	//если в буфере осталось что-то с прошлого раза
 	if (*buf)
 	{
+		/*
+		 **1)finding length of the line
+		 **2)allocateing memory for line, which will be returned
+		 **3)writing into result bytes from buffer
+		 **4)copying remaining cymbols into temporary line
+		 **5)writing zeroes into old buffer
+		 **6)writing remain symbols into buffer
+		 **7)releasing temp
+		 **8)expanding size of result in case we will read from file again
+		 */
 		len = 0;
-		//узнаем длинну слова
 		while (buf[len] != '\n' && buf[len])
 			len++;
-		//выделяем память под строку, которую будем возвращать
 		result = ft_strnew(len);
-		//записываем в нее байты из буфера
 		result = ft_strncpy(result, buf, len);
-		//копируем оставшиеся символы во временную строку
 		temp = ft_strdup(buf + len + 1);
-		//зануляем старый буфер
 		ft_bzero(buf, BUFF_SIZE + 1);
-		//записываем в начало буфера временную строку(остаток)
 		ft_strcpy(buf, temp);
-		//освобождаем temp
 		free(temp);
-		//расширяем размер результата на случай если мы еще будем что-то считывать
 		temp_size += len;
 	}
 
@@ -67,17 +74,19 @@ int get_next_line(const int fd, char **line)
 		}
 		else
 		{
-			//create temporary copy of result
+			/*
+			 **1)create temporary copy of result
+			 **2)free old result
+			 **3)create enough space for result + buf
+			 **4)copy temp into result
+			 **5)concatanate buf into result
+			 **6)free temporary string
+			 */
 			temp = ft_strdup(result);
-			//old result is not needed
 			free(result);
-			//create enough space for result + buf
 			result = ft_strnew(temp_size);
-			//copy temp into result
 			result = ft_strcpy(result, temp);
-			//concatanate buf into result
 			result = ft_strncat(result, buf, len);
-			//temporary string doesn't needed
 			free(temp);
 		}
 		if (len < bytes_read)
@@ -91,7 +100,6 @@ int get_next_line(const int fd, char **line)
 		if (len == bytes_read)
 			ft_bzero(buf, BUFF_SIZE + 1);
 	}
-	//если bytes_read < BUFF_SIZE
 	if (result)
 	{
 		*line = result;
