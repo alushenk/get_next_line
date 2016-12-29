@@ -56,9 +56,6 @@ int get_next_line(const int fd, char **line)
 		while (buf[len] != '\n' && len < bytes_read)
 			len++;
 		temp_size += len;
-		/*
-		 *  мы не должны включать \n в результат
-        */
 		//if it is a first step
 		if (!result)
 		{
@@ -91,6 +88,8 @@ int get_next_line(const int fd, char **line)
 			*line = result;
 			return(1);
 		}
+		if (len == bytes_read)
+			ft_bzero(buf, BUFF_SIZE + 1);
 	}
 	//если bytes_read < BUFF_SIZE
 	if (result)
