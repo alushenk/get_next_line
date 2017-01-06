@@ -1,11 +1,19 @@
-//
-// Created by Anton Lushenko on 12/27/16.
-//
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   get_next_line.c                                    :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: alushenk <marvin@42.fr>                    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2017/01/06 20:03:25 by alushenk          #+#    #+#             */
+/*   Updated: 2017/01/06 20:03:28 by alushenk         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
 #include "get_next_line.h"
 #include "libft.h"
 
-t_fd *get_fd(t_fd *list, int fd)
+t_fd	*get_fd(t_fd *list, int fd)
 {
 	while (list)
 	{
@@ -13,7 +21,7 @@ t_fd *get_fd(t_fd *list, int fd)
 			return (list);
 		if (list->next)
 			list = list->next;
-		else if ((list->next = (t_fd *) malloc(sizeof(t_fd))))
+		else if ((list->next = (t_fd *)malloc(sizeof(t_fd))))
 		{
 			list = list->next;
 			list->fd = fd;
@@ -21,7 +29,7 @@ t_fd *get_fd(t_fd *list, int fd)
 			return (list);
 		}
 	}
-	if ((list = (t_fd *) malloc(sizeof(t_fd))))
+	if ((list = (t_fd *)malloc(sizeof(t_fd))))
 	{
 		list->fd = fd;
 		list->next = NULL;
@@ -30,7 +38,7 @@ t_fd *get_fd(t_fd *list, int fd)
 	return (NULL);
 }
 
-void move_buf(char *elem_buf, int len)
+void	move_buf(char *elem_buf, int len)
 {
 	char *temp;
 
@@ -40,14 +48,44 @@ void move_buf(char *elem_buf, int len)
 	free(temp);
 }
 
-int get_next_line(const int fd, char **line)
+int		read_str(char *elem_buf, char **line, ssize_t bytes_read)
+{
+	int		len;
+	char	*temp;
+
+	len = 0;
+	while (elem_buf[len] != '\n' && elem_buf[len])
+		len++;
+	if (!*line)
+	{
+		*line = ft_strnew(len);
+		*line = ft_strncpy(*line, elem_buf, len);
+	}
+	else
+	{
+		temp = ft_strdup(*line);
+		free(*line);
+		*line = ft_strnew(ft_strlen(temp) + len);
+		ft_strcpy(*line, temp);
+		*line = ft_strncat(*line, elem_buf, len);
+		free(temp);
+	}
+	if (len < bytes_read)
+	{
+		move_buf(elem_buf, len);
+		return (1);
+	}
+	if (len == bytes_read)
+		ft_bzero(elem_buf, BUFF_SIZE + 1);
+	return (0);
+}
+
+int		get_next_line(const int fd, char **line)
 {
 	static t_fd *list;
-	t_fd *elem;
-
-	char *temp;
-	ssize_t len;
-	ssize_t bytes_read;
+	t_fd		*elem;
+	ssize_t		len;
+	ssize_t		bytes_read;
 
 	bytes_read = 0;
 	*line = NULL;
@@ -71,29 +109,8 @@ int get_next_line(const int fd, char **line)
 	}
 	while ((bytes_read = read(fd, elem->buf, BUFF_SIZE)))
 	{
-		len = 0;
-		while (elem->buf[len] != '\n' && elem->buf[len])
-			len++;
-		if (!*line)
-		{
-			*line = ft_strnew(len);
-			*line = ft_strncpy(*line, elem->buf, len);
-		} else
-		{
-			temp = ft_strdup(*line);
-			free(*line);
-			*line = ft_strnew(ft_strlen(temp) + len);
-			ft_strcpy(*line, temp);
-			*line = ft_strncat(*line, elem->buf, len);
-			free(temp);
-		}
-		if (len < bytes_read)
-		{
-			move_buf(elem->buf, len);
+		if (read_str(elem->buf, line, bytes_read))
 			return (1);
-		}
-		if (len == bytes_read)
-			ft_bzero(elem->buf, BUFF_SIZE + 1);
 	}
 	if (!*line)
 		return (0);
