@@ -5,38 +5,50 @@
 #include "get_next_line.h"
 #include "libft.h"
 
-t_fd    *get_fd(t_fd *list, int fd)
+t_fd *get_fd(t_fd **desc, int fd)
 {
-    if (list)
-    {
-        while (list)
-        {
-            if (list->fd == fd)
-                return (list);
-            list = list->next;
-        }
-    } else
-    {
-        list = (t_fd*)malloc(sizeof(t_fd));
-        if (list)
-        {
-            list->fd = fd;
-            list->next = NULL;
-            return (list);
-        }
-    }
-    return (NULL);
+	t_fd *ptr;
+
+	ptr = *desc;
+	if (ptr)
+	{
+		while (ptr)
+		{
+			if (ptr->fd == fd)
+				return (ptr);
+			if (ptr->next)
+				ptr = ptr->next;
+			else
+				break;
+		}
+		ptr->next = (t_fd *) malloc(sizeof(t_fd));
+		if (ptr->next)
+		{
+			ptr = ptr->next;
+			ptr->fd = fd;
+			ptr->next = NULL;
+			return (ptr);
+		}
+	}
+	ptr = (t_fd *) malloc(sizeof(t_fd));
+	if (ptr)
+	{
+		ptr->fd = fd;
+		ptr->next = NULL;
+		return (ptr);
+	}
+	return (NULL);
 }
 
 int get_next_line(const int fd, char **line)
 {
-	static t_fd *list;
-    t_fd        *elem;
+	static t_fd *desc;
+	t_fd *elem;
 
-	char		*temp;
-	ssize_t		len;
-	size_t		temp_size;
-	ssize_t		bytes_read;
+	char *temp;
+	ssize_t len;
+	size_t temp_size;
+	ssize_t bytes_read;
 
 	bytes_read = 0;
 	temp_size = 0;
@@ -44,8 +56,15 @@ int get_next_line(const int fd, char **line)
 
 	//подточить напильником логику так, чтобы возвращало -1
 	//если одна из библиотечных функций не смогла выделить память.
-    if (fd < 0 || line == NULL || BUFF_SIZE <= 0 || !(elem = get_fd(list, fd)))
-        return (-1);
+	if (fd < 0 || line == NULL || BUFF_SIZE <= 0)
+		return (-1);
+	if (desc)
+		elem = get_fd(&desc, fd);
+	else
+	{
+		desc = get_fd(&desc, fd);
+		elem = desc;
+	}
 
 	//если в буфере осталось что-то с прошлого раза
 	if (*elem->buf)
@@ -63,31 +82,29 @@ int get_next_line(const int fd, char **line)
 		len = 0;
 		while (elem->buf[len] != '\n' && elem->buf[len])
 			len++;
-        //if len == 0 ???
-        *line = ft_strnew(len);
-        *line = ft_strncpy(*line, elem->buf, len);
+		//if len == 0 ???
+		*line = ft_strnew(len);
+		*line = ft_strncpy(*line, elem->buf, len);
 		temp = ft_strdup(elem->buf + len + 1);
 		ft_bzero(elem->buf, BUFF_SIZE + 1);
 		ft_strcpy(elem->buf, temp);
 		free(temp);
 		temp_size += len;
 	}
-
 	while ((bytes_read = read(fd, elem->buf, BUFF_SIZE)))
 	{
-        if (bytes_read == -1)
-            return (-1);
-		elem->buf[bytes_read] = '\0';
+		if (bytes_read == -1)
+			return (-1);
+		//elem->buf[bytes_read] = '\0';
 		len = 0;
 		while (elem->buf[len] != '\n' && len < bytes_read)
 			len++;
 		temp_size += len;
 		if (!*line)
 		{
-            *line = ft_strnew(len);
-            *line = ft_strncpy(*line, elem->buf, len);
-		}
-		else
+			*line = ft_strnew(len);
+			*line = ft_strncpy(*line, elem->buf, len);
+		} else
 		{
 			/*
 			 **1)create temporary copy of *line
@@ -99,7 +116,7 @@ int get_next_line(const int fd, char **line)
 			 */
 			temp = ft_strdup(*line);
 			free(*line);
-            *line = ft_strnew(temp_size);
+			*line = ft_strnew(temp_size);
 			*line = ft_strcpy(*line, temp);
 			*line = ft_strncat(*line, elem->buf, len);
 			free(temp);
@@ -109,13 +126,12 @@ int get_next_line(const int fd, char **line)
 			temp = ft_strdup(elem->buf + len + 1);
 			ft_bzero(elem->buf, BUFF_SIZE + 1);
 			ft_strcpy(elem->buf, temp);
-			*line = *line;
-			return(1);
+			return (1);
 		}
 		if (len == bytes_read)
 			ft_bzero(elem->buf, BUFF_SIZE + 1);
 	}
 	if (!*line)
-        return (0);
+		return (0);
 	return (1);
 }
