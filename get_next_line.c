@@ -48,14 +48,10 @@ void	move_buf(char *elem_buf, int len)
 	free(temp);
 }
 
-int		read_str(char *elem_buf, char **line, ssize_t bytes_read)
+int		read_str(char *elem_buf, char **line, ssize_t len)
 {
-	int		len;
 	char	*temp;
 
-	len = 0;
-	while (elem_buf[len] != '\n' && elem_buf[len])
-		len++;
 	if (!*line)
 	{
 		*line = ft_strnew(len);
@@ -67,16 +63,34 @@ int		read_str(char *elem_buf, char **line, ssize_t bytes_read)
 		free(*line);
 		*line = ft_strnew(ft_strlen(temp) + len);
 		ft_strcpy(*line, temp);
-		*line = ft_strncat(*line, elem_buf, len);
+		ft_strncat(*line, elem_buf, len);
 		free(temp);
 	}
-	if (len < bytes_read)
+	if (elem_buf[len] == '\n')
 	{
 		move_buf(elem_buf, len);
 		return (1);
 	}
-	if (len == bytes_read)
+	if (!elem_buf[len])
 		ft_bzero(elem_buf, BUFF_SIZE + 1);
+	return (0);
+}
+
+int		read_buf(char *elem_buf, char **line)
+{
+	size_t len;
+
+	len = 0;
+	while (elem_buf[len] != '\n' && elem_buf[len])
+		len++;
+	*line = ft_strnew(len);
+	*line = ft_strncpy(*line, elem_buf, len);
+	if (elem_buf[len] == '\n')
+	{
+		move_buf(elem_buf, len);
+		return (1);
+	}
+	move_buf(elem_buf, len);
 	return (0);
 }
 
@@ -85,34 +99,29 @@ int		get_next_line(const int fd, char **line)
 	static t_fd *list;
 	t_fd		*elem;
 	ssize_t		len;
-	ssize_t		bytes_read;
 
-	bytes_read = 0;
 	*line = NULL;
-	if (fd < 0 || line == NULL || BUFF_SIZE <= 0)
-		return (-1);
-	if (list)
-		elem = get_fd(list, fd);
-	else
+	if (fd > 0 || BUFF_SIZE >= 0)
 	{
-		list = get_fd(list, fd);
-		elem = list;
-	}
-	if (*elem->buf)
-	{
-		len = 0;
-		while (elem->buf[len] != '\n' && elem->buf[len])
-			len++;
-		*line = ft_strnew(len);
-		*line = ft_strncpy(*line, elem->buf, len);
-		move_buf(elem->buf, len);
-	}
-	while ((bytes_read = read(fd, elem->buf, BUFF_SIZE)))
-	{
-		if (read_str(elem->buf, line, bytes_read))
+		if (list)
+			elem = get_fd(list, fd);
+		else
+		{
+			list = get_fd(list, fd);
+			elem = list;
+		}
+		if (*elem->buf && read_buf(elem->buf, line))
 			return (1);
+		while (read(fd, elem->buf, BUFF_SIZE))
+		{
+			len = 0;
+			while (elem->buf[len] != '\n' && elem->buf[len])
+				len++;
+			if (read_str(elem->buf, line, len))
+				return (1);
+		}
+		if (!*line)
+			return (0);
 	}
-	if (!*line)
-		return (0);
-	return (1);
+	return (-1);
 }
