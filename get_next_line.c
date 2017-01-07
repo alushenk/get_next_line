@@ -13,7 +13,7 @@
 #include "get_next_line.h"
 #include "libft.h"
 
-t_fd	*get_fd(t_fd *list, int fd)
+static t_fd		*get_fd(t_fd *list, int fd)
 {
 	while (list)
 	{
@@ -38,7 +38,7 @@ t_fd	*get_fd(t_fd *list, int fd)
 	return (NULL);
 }
 
-void	move_buf(char *elem_buf, int len)
+static void		move_buf(char *elem_buf, int len)
 {
 	char *temp;
 
@@ -48,10 +48,10 @@ void	move_buf(char *elem_buf, int len)
 	free(temp);
 }
 
-int		read_str(char *elem_buf, char **line, ssize_t len)
+static int		read_str(char *elem_buf, char *temp, char **line, ssize_t len)
 {
-	char	*temp;
-
+	while (elem_buf[len] != '\n' && elem_buf[len])
+		len++;
 	if (!*line)
 	{
 		*line = ft_strnew(len);
@@ -76,11 +76,8 @@ int		read_str(char *elem_buf, char **line, ssize_t len)
 	return (0);
 }
 
-int		read_buf(char *elem_buf, char **line)
+static int		read_buf(char *elem_buf, char **line, ssize_t len)
 {
-	size_t len;
-
-	len = 0;
 	while (elem_buf[len] != '\n' && elem_buf[len])
 		len++;
 	*line = ft_strnew(len);
@@ -94,34 +91,29 @@ int		read_buf(char *elem_buf, char **line)
 	return (0);
 }
 
-int		get_next_line(const int fd, char **line)
+int				get_next_line(const int fd, char **line)
 {
 	static t_fd *list;
 	t_fd		*elem;
-	ssize_t		len;
 
 	*line = NULL;
-	if (fd > 0 || BUFF_SIZE >= 0)
+	if (list)
+		elem = get_fd(list, fd);
+	else
 	{
-		if (list)
-			elem = get_fd(list, fd);
-		else
-		{
-			list = get_fd(list, fd);
-			elem = list;
-		}
-		if (*elem->buf && read_buf(elem->buf, line))
-			return (1);
-		while (read(fd, elem->buf, BUFF_SIZE))
-		{
-			len = 0;
-			while (elem->buf[len] != '\n' && elem->buf[len])
-				len++;
-			if (read_str(elem->buf, line, len))
-				return (1);
-		}
-		if (!*line)
-			return (0);
+		list = get_fd(list, fd);
+		elem = list;
 	}
-	return (-1);
+	if (fd < 0 || BUFF_SIZE <= 0 || read(fd, elem->buf, 0) == -1)
+		return (-1);
+	if (*elem->buf && read_buf(elem->buf, line, 0))
+		return (1);
+	while (read(fd, elem->buf, BUFF_SIZE))
+	{
+		if (read_str(elem->buf, elem->temp, line, 0))
+			return (1);
+	}
+	if (!*line)
+		return (0);
+	return (1);
 }

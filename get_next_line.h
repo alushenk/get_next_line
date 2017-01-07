@@ -12,12 +12,13 @@
 
 int get_next_line(const int fd, char **line);
 
-#define BUFF_SIZE 10
+#define BUFF_SIZE 10000000
 
 typedef struct      s_fd
 {
     int             fd;
     char            buf[BUFF_SIZE + 1];
+	char 			*temp;
     struct s_fd *next;
 }                   t_fd;
 
