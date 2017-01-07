@@ -9,6 +9,8 @@ int main(int argc, char **argv)
 {
 	int		fd1;
 	int		fd2;
+	int		g1;
+	int		g2;
 	char	*line1;
 	char 	*line2;
 	int 	i;
@@ -18,9 +20,11 @@ int main(int argc, char **argv)
 	{
 		fd1 = open(argv[1], O_RDONLY);
 		fd2 = open(argv[2], O_RDONLY);
-		while (get_next_line(fd1, &line1) && get_next_line(fd2, &line2))
+		while ((g1 = get_next_line(fd1, &line1)) && (g2 = get_next_line(fd2, &line2)))
         {
-            printf("%s\n", line1);
+			if (g1 == -1 && g2 == -1)
+				return (0);
+			printf("%s\n", line1);
 			printf("%s\n", line2);
             free(line1);
 			free(line2);

@@ -96,6 +96,8 @@ int				get_next_line(const int fd, char **line)
 	static t_fd *list;
 	t_fd		*elem;
 
+	if (line == NULL)
+		return (-1);
 	*line = NULL;
 	if (list)
 		elem = get_fd(list, fd);
