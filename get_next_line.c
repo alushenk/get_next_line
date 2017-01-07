@@ -11,7 +11,6 @@
 /* ************************************************************************** */
 
 #include "get_next_line.h"
-#include "libft.h"
 
 static t_fd		*get_fd(t_fd *list, int fd)
 {

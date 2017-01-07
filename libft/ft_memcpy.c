@@ -1,32 +1,27 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   get_next_line.h                                    :+:      :+:    :+:   */
+/*   ft_memcpy.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: alushenk <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2017/01/07 18:47:09 by alushenk          #+#    #+#             */
-/*   Updated: 2017/01/07 18:47:19 by alushenk         ###   ########.fr       */
+/*   Created: 2016/11/21 16:53:53 by alushenk          #+#    #+#             */
+/*   Updated: 2016/11/21 16:53:55 by alushenk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef GET_NEXT_LINE_GET_NEXT_LINE_H
-# define GET_NEXT_LINE_GET_NEXT_LINE_H
-# include <fcntl.h>
-# include <stdlib.h>
-# include <unistd.h>
-# include "libft/libft.h"
+#include "libft.h"
 
-int					get_next_line(const int fd, char **line);
-
-# define BUFF_SIZE 9
-
-typedef struct		s_fd
+void	*ft_memcpy(void *dst, const void *src, size_t n)
 {
-	int				fd;
-	char			buf[BUFF_SIZE + 1];
-	char			*temp;
-	struct s_fd		*next;
-}					t_fd;
+	unsigned char *usrc;
+	unsigned char *udst;
 
-#endif
+	usrc = (unsigned char*)src;
+	udst = (unsigned char*)dst;
+	if (udst == usrc)
+		return (dst);
+	while (n--)
+		*(udst++) = *(usrc++);
+	return (dst);
+}

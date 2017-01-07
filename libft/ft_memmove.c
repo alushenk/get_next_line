@@ -1,32 +1,33 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   get_next_line.h                                    :+:      :+:    :+:   */
+/*   ft_memmove.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: alushenk <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2017/01/07 18:47:09 by alushenk          #+#    #+#             */
-/*   Updated: 2017/01/07 18:47:19 by alushenk         ###   ########.fr       */
+/*   Created: 2016/11/22 14:07:51 by alushenk          #+#    #+#             */
+/*   Updated: 2016/11/22 14:07:57 by alushenk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef GET_NEXT_LINE_GET_NEXT_LINE_H
-# define GET_NEXT_LINE_GET_NEXT_LINE_H
-# include <fcntl.h>
-# include <stdlib.h>
-# include <unistd.h>
-# include "libft/libft.h"
+#include "libft.h"
 
-int					get_next_line(const int fd, char **line);
-
-# define BUFF_SIZE 9
-
-typedef struct		s_fd
+void	*ft_memmove(void *dst, const void *src, size_t len)
 {
-	int				fd;
-	char			buf[BUFF_SIZE + 1];
-	char			*temp;
-	struct s_fd		*next;
-}					t_fd;
+	unsigned char	*udst;
+	unsigned char	*usrc;
 
-#endif
+	udst = (unsigned char*)dst;
+	usrc = (unsigned char*)src;
+	if (udst > usrc)
+	{
+		udst += len;
+		usrc += len;
+		while (len--)
+			*(--udst) = *(--usrc);
+	}
+	else
+		while (len--)
+			*(udst++) = *(usrc++);
+	return (dst);
+}

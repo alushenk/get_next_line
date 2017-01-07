@@ -1,32 +1,34 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   get_next_line.h                                    :+:      :+:    :+:   */
+/*   ft_atoi.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: alushenk <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2017/01/07 18:47:09 by alushenk          #+#    #+#             */
-/*   Updated: 2017/01/07 18:47:19 by alushenk         ###   ########.fr       */
+/*   Created: 2016/11/26 14:38:52 by alushenk          #+#    #+#             */
+/*   Updated: 2016/11/26 14:38:54 by alushenk         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef GET_NEXT_LINE_GET_NEXT_LINE_H
-# define GET_NEXT_LINE_GET_NEXT_LINE_H
-# include <fcntl.h>
-# include <stdlib.h>
-# include <unistd.h>
-# include "libft/libft.h"
+#include "libft.h"
 
-int					get_next_line(const int fd, char **line);
-
-# define BUFF_SIZE 9
-
-typedef struct		s_fd
+int	ft_atoi(const char *str)
 {
-	int				fd;
-	char			buf[BUFF_SIZE + 1];
-	char			*temp;
-	struct s_fd		*next;
-}					t_fd;
+	int	result;
+	int	sign;
 
-#endif
+	result = 0;
+	sign = 1;
+	while (ft_isspace(*str))
+		str++;
+	if (*str == '-')
+		sign = -1;
+	if (*str == '-' || *str == '+')
+		str++;
+	while (*str <= '9' && *str >= '0')
+	{
+		result = result * 10 + (*str - '0');
+		str++;
+	}
+	return (result * sign);
+}
