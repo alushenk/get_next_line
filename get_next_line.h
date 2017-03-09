@@ -19,7 +19,7 @@
 
 int					get_next_line(const int fd, char **line);
 
-# define BUFF_SIZE 9
+# define BUFF_SIZE 600
 
 typedef struct		s_fd
 {
